@@ -20,20 +20,24 @@ typedef struct {
     char *value;
 } Token;
 
+//function to remove whitespace and comments from the source code
 char* removeWhitespaceAndComments(char* source);
 
+//to create this function I used some FA
+//I created a total of 7 FA's, (10 if we count the parentheses and comma)
+//I implemented the FA using the PDF 5 (implementation of DFA) as reference
 Token* scan(char* code){
-    int flag=1;
-    int errorFlag=0;
-    int state;
-    Token* tokens=NULL;
-    int tokenNumber=0;
-    char* sourceCode=removeWhitespaceAndComments(code);
-    char* start=sourceCode;
+    int flag; //flag to check if the input is valid
+    int errorFlag=0; //flag to check if there is an error
+    int state; //state of the FA
+    Token* tokens=NULL; //array of tokens
+    int tokenNumber=0; //number of tokens
+    char* sourceCode=removeWhitespaceAndComments(code); //source code without whitespace and comments
+    char* start=sourceCode; //start of the source code
     while (*sourceCode != '\0' && !errorFlag) {
-        state=0;
+        state=0; //initial state of the FA
         flag=1;
-        if ((*sourceCode=='+' || *sourceCode=='-') || (*sourceCode >= '0' && *sourceCode <= '9')) {
+        if ((*sourceCode=='+' || *sourceCode=='-') || (*sourceCode >= '0' && *sourceCode <= '9')) { //the input is a number
             while (flag) {
                 if (*sourceCode >= '0' && *sourceCode <= '9') {
                     switch (state) {
@@ -113,7 +117,7 @@ Token* scan(char* code){
                 start=sourceCode;
             }
         }
-        else if (*sourceCode=='a'){
+        else if (*sourceCode=='a'){ //the input can be an operator
             while (flag){
                 if (*sourceCode=='a'){
                     switch (state){
@@ -159,7 +163,7 @@ Token* scan(char* code){
                 start=sourceCode;
             }
         }
-        else if (*sourceCode=='s'){
+        else if (*sourceCode=='s'){ //the input can be an operator
             while (flag){
                 if (*sourceCode=='s'){
                     switch (state){
@@ -213,7 +217,7 @@ Token* scan(char* code){
                 start=sourceCode;
             }
         }
-        else if (*sourceCode=='d'){
+        else if (*sourceCode=='d'){ //the input can be an operator
             while (flag){
                 if (*sourceCode=='d'){
                     switch (state){
@@ -267,7 +271,7 @@ Token* scan(char* code){
                 start=sourceCode;
             }
         }
-        else if (*sourceCode=='p'){
+        else if (*sourceCode=='p'){ //the input can be an operator
             while (flag){
                 if (*sourceCode=='p'){
                     switch (state){
@@ -321,7 +325,7 @@ Token* scan(char* code){
                 start=sourceCode;
             }
         }
-        else if (*sourceCode=='t'){
+        else if (*sourceCode=='t'){ //the input can be an operator
             while (flag){
                 if (*sourceCode=='t'){
                     switch (state){
@@ -387,7 +391,7 @@ Token* scan(char* code){
                 start=sourceCode;
             }
         }
-        else if (*sourceCode=='m'){
+        else if (*sourceCode=='m'){ //the input can be an operator
             while (flag){
                 if (*sourceCode=='m'){
                     switch (state){
@@ -468,7 +472,7 @@ Token* scan(char* code){
                 start=sourceCode;
             }
         }
-        else if (*sourceCode==','){
+        else if (*sourceCode==','){ //the input is a comma
             sourceCode++;
             tokenNumber++;
             tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
@@ -478,7 +482,7 @@ Token* scan(char* code){
             tokens[tokenNumber-1].value[1]='\0';
             start=sourceCode;
         }
-        else if (*sourceCode=='('){
+        else if (*sourceCode=='('){ //the input is a left parenthesis
             sourceCode++;
             tokenNumber++;
             tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
@@ -488,7 +492,7 @@ Token* scan(char* code){
             tokens[tokenNumber-1].value[1]='\0';
             start=sourceCode;
         }
-        else if (*sourceCode==')'){
+        else if (*sourceCode==')'){ //the input is a right parenthesis
             sourceCode++;
             tokenNumber++;
             tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
@@ -498,8 +502,11 @@ Token* scan(char* code){
             tokens[tokenNumber-1].value[1]='\0';
             start=sourceCode;
         }
+        else{   //the input is invalid
+            errorFlag=1;
+        }
     }
-    if (!errorFlag){
+    if (!errorFlag){    //if the program reached this point and errorFlag is false, then the input is valid
         tokenNumber++;
         tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
         tokens[tokenNumber-1].type=END;
@@ -507,7 +514,7 @@ Token* scan(char* code){
         tokens[tokenNumber-1].value[0]='$';
         tokens[tokenNumber-1].value[1]='\0';
     }
-    else {
+    else {    //if the program reached this point and errorFlag is true, then the input is invalid
         free(tokens);
         tokens=(Token*)malloc(2*sizeof(Token));
         tokens[0].type=ERROR;
@@ -526,7 +533,7 @@ char* removeWhitespaceAndComments(char* source) {
     int inComment = 0;
     int index = 0;
     int length = strlen(source);
-    char* result = (char*)malloc(length + 1); // Allocate memory for the result
+    char* result = (char*)malloc(length + 1); 
 
     for (int i = 0; i < length; i++) {
         if (!inComment && i + 1 < length && source[i] == '/' && source[i + 1] == '*') {
@@ -536,7 +543,7 @@ char* removeWhitespaceAndComments(char* source) {
             inComment = 0; // Exiting a comment block
             i++; // Skip the '/' character
         } else if (!inComment && !isspace((unsigned char)source[i])) {
-            result[index++] = source[i]; // Copy non-whitespace, non-comment characters
+            result[index++] = source[i]; // Copy non-whitespace and non-comment characters
         }
     }
 
@@ -545,7 +552,7 @@ char* removeWhitespaceAndComments(char* source) {
 }
 
 void main(){
-    char string[50]="add(5, mul(3, sub(10, pow(6, 4))))";
+    char string[50]="gadd(5, mul(3, sub(10, pow(6, 4))))";
     Token* tokens=scan(string);
     for (int i=0;tokens[i].type!=END;i++){
         printf("%s  ", tokens[i].value );
