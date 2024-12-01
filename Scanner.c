@@ -109,6 +109,7 @@ Token* scan(char* code){
                 tokens[tokenNumber-1].type=NUMBER;
                 tokens[tokenNumber-1].value=(char*)malloc((sourceCode-start+1)*sizeof(char));
                 strncpy(tokens[tokenNumber-1].value,start,sourceCode-start);
+                tokens[tokenNumber-1].value[sourceCode-start]='\0';
                 start=sourceCode;
             }
         }
@@ -152,8 +153,9 @@ Token* scan(char* code){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
                 tokens[tokenNumber-1].type=OPERATOR;
-                tokens[tokenNumber-1].value=(char*)malloc(sizeof(char));
+                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
                 tokens[tokenNumber-1].value[0]='+';
+                tokens[tokenNumber-1].value[1]='\0';
                 start=sourceCode;
             }
         }
@@ -205,8 +207,9 @@ Token* scan(char* code){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
                 tokens[tokenNumber-1].type=OPERATOR;
-                tokens[tokenNumber-1].value=(char*)malloc(sizeof(char));
+                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
                 tokens[tokenNumber-1].value[0]='-';
+                tokens[tokenNumber-1].value[1]='\0';
                 start=sourceCode;
             }
         }
@@ -258,8 +261,9 @@ Token* scan(char* code){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
                 tokens[tokenNumber-1].type=OPERATOR;
-                tokens[tokenNumber-1].value=(char*)malloc(sizeof(char));
+                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
                 tokens[tokenNumber-1].value[0]='/';
+                tokens[tokenNumber-1].value[1]='\0';
                 start=sourceCode;
             }
         }
@@ -311,8 +315,9 @@ Token* scan(char* code){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
                 tokens[tokenNumber-1].type=OPERATOR;
-                tokens[tokenNumber-1].value=(char*)malloc(sizeof(char));
+                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
                 tokens[tokenNumber-1].value[0]='^';
+                tokens[tokenNumber-1].value[1]='\0';
                 start=sourceCode;
             }
         }
@@ -376,8 +381,9 @@ Token* scan(char* code){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
                 tokens[tokenNumber-1].type=OPERATOR;
-                tokens[tokenNumber-1].value=(char*)malloc(sizeof(char));
+                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
                 tokens[tokenNumber-1].value[0]='?';
+                tokens[tokenNumber-1].value[1]='\0';
                 start=sourceCode;
             }
         }
@@ -445,7 +451,7 @@ Token* scan(char* code){
                 }
                 else {
                     flag=0;
-                    if (state!=5)   // I am not in a final state
+                    if (state!=5 && state!=3)   // I am not in a final state
                         errorFlag=1;   
                 }
             }
@@ -453,11 +459,12 @@ Token* scan(char* code){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
                 tokens[tokenNumber-1].type=OPERATOR;
-                tokens[tokenNumber-1].value=(char*)malloc(sizeof(char));
+                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
                 if (state==5)
                     tokens[tokenNumber-1].value[0]='%';
                 else
                     tokens[tokenNumber-1].value[0]='*';
+                tokens[tokenNumber-1].value[1]='\0';
                 start=sourceCode;
             }
         }
@@ -466,8 +473,9 @@ Token* scan(char* code){
             tokenNumber++;
             tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
             tokens[tokenNumber-1].type=COMMA;
-            tokens[tokenNumber-1].value=(char*)malloc(sizeof(char));
+            tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
             tokens[tokenNumber-1].value[0]=',';
+            tokens[tokenNumber-1].value[1]='\0';
             start=sourceCode;
         }
         else if (*sourceCode=='('){
@@ -475,8 +483,9 @@ Token* scan(char* code){
             tokenNumber++;
             tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
             tokens[tokenNumber-1].type=LEFT_PARENTHESIS;
-            tokens[tokenNumber-1].value=(char*)malloc(sizeof(char));
+            tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
             tokens[tokenNumber-1].value[0]='(';
+            tokens[tokenNumber-1].value[1]='\0';
             start=sourceCode;
         }
         else if (*sourceCode==')'){
@@ -484,8 +493,9 @@ Token* scan(char* code){
             tokenNumber++;
             tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
             tokens[tokenNumber-1].type=RIGHT_PARENTHESIS;
-            tokens[tokenNumber-1].value=(char*)malloc(sizeof(char));
+            tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
             tokens[tokenNumber-1].value[0]=')';
+            tokens[tokenNumber-1].value[1]='\0';
             start=sourceCode;
         }
     }
@@ -493,15 +503,21 @@ Token* scan(char* code){
         tokenNumber++;
         tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
         tokens[tokenNumber-1].type=END;
-        tokens[tokenNumber-1].value=(char*)malloc(sizeof(char));
+        tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
         tokens[tokenNumber-1].value[0]='$';
+        tokens[tokenNumber-1].value[1]='\0';
     }
     else {
         free(tokens);
-        tokens=(Token*)malloc(sizeof(Token));
+        tokens=(Token*)malloc(2*sizeof(Token));
         tokens[0].type=ERROR;
-        tokens[0].value=(char*)malloc(sizeof(char));
+        tokens[0].value=(char*)malloc(2*sizeof(char));
         tokens[0].value[0]='E';
+        tokens[0].value[1]='\0';
+        tokens[1].type=END;
+        tokens[1].value=(char*)malloc(2*sizeof(char));
+        tokens[1].value[0]='$';
+        tokens[1].value[1]='\0';
     }
     return tokens;
 }
@@ -529,10 +545,9 @@ char* removeWhitespaceAndComments(char* source) {
 }
 
 void main(){
-    char string[10]="add(5, 2)";
+    char string[50]="add(5, mul(3, sub(10, pow(6, 4))))";
     Token* tokens=scan(string);
     for (int i=0;tokens[i].type!=END;i++){
-        printf("a");
-        printf("%s - ", tokens[i].value );
+        printf("%s  ", tokens[i].value );
     }
 }
