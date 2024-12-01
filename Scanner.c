@@ -557,4 +557,5 @@ void main(){
     for (int i=0;tokens[i].type!=END;i++){
         printf("%s  ", tokens[i].value );
     }
+    free(tokens);
 }
