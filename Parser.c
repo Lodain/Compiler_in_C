@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define NUM_OPERATORS 13
+#define NUM_OPERATORS 16
 
 typedef enum {
     ADD=0,    //0
@@ -17,11 +17,12 @@ typedef enum {
     RPAREN, //9
     NUMBER, //10
     END,    //11
-    ERROR,  //12
-    P,      //13    <
-    A,      //14
-    B,      //15
-    S,      //16
+    A,      //12
+    B,      //13
+    S,      //14
+    ERROR,  //15
+    P,      //16    <
+    
 } TokenType;
 
 // Define a token structure
@@ -62,7 +63,10 @@ static char precedenceTable[NUM_OPERATORS][NUM_OPERATORS] = {
     { '<', '<', '<', '<', '<', '<', '<', '<', '<', '=', '<', ' ' }, // LPAREN
     { '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', ' ', '>' }, // RPAREN
     { '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', ' ', '>' }, // I
-    { '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', ' ' }  // DOLLAR
+    { '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', ' ' },  // DOLLAR
+    { '=', '=', '=', '=', '=', '=', '=', '=', '=', '>', '=', '>' },   // A
+    { '=', '=', '=', '=', '=', '=', '=', '=', '=', '>', '=', '>' },   // B
+    { '=', '=', '=', '=', '=', '=', '=', '<', '=', '<', '=', '=' },   // S
 };
 
 
@@ -159,17 +163,8 @@ char* parse(Token* tokens) {
         }
         //printf("%d - ", tokens->type);
         //printf("%c", precedenceTable[stackTop.type][tokens->type]);
-        if ((stackTop.type == A || stackTop.type == B || stackTop.type == S) && tokens->type != END){
-            push(&stack, stackTop);
-            push(&stack, *tokens);
-            tokens++;
-        }
-        else{
-            if (tokens->type == END){
-                action = '>';
-            }
-            else action = precedenceTable[stackTop.type][tokens->type];
-            switch(action){
+         
+            switch(precedenceTable[stackTop.type][tokens->type]){
                 case '=':
                 push(&stack, stackTop);
                 push(&stack, *tokens);
@@ -211,8 +206,12 @@ char* parse(Token* tokens) {
                     return output;
                 }
                 break;
+            default:
+                output = (char*)malloc(14*sizeof(char));
+                strcpy(output, "Syntax Error!3");
+                return output;
             }
-        }
+        
         printStack(stack);
         printf("\n");
     }
