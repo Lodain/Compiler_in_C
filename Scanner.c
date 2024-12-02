@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 
+//this is the token type enum
 typedef enum {
     ADD,    //0
     SUB,    //1
@@ -21,6 +22,7 @@ typedef enum {
     ERROR   //12
 } TokenType;
 
+//this is the token structure
 typedef struct {
     TokenType type;
     char *value;

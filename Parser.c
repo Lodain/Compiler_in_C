@@ -5,7 +5,7 @@
 #define NUM_OPERATORS 13
 
 typedef enum {
-    ADD=0,    //0
+    ADD=0,  //0
     SUB,    //1
     MUL,    //2
     DIV,    //3
@@ -24,12 +24,13 @@ typedef enum {
     S,      //16
 } TokenType;
 
-// Define a token structure
+//this is the token structure
 typedef struct {
     TokenType type;
     char *value;
 } Token;
 
+//declaration of the tree node structure
 typedef struct treeNode{
     char* data;
     struct treeNode *left;
@@ -37,17 +38,20 @@ typedef struct treeNode{
 } TreeNode;
 typedef TreeNode *TreeNodePtr;
 
+//declaration of the stack for the abstract syntax tree
 typedef struct stackTree{
     TreeNodePtr value;
     struct stackTree* next;
 } StackTree;
 typedef StackTree* StackTreePtr;
 
+//declaration of the rule structure
 typedef struct {
     Token left;
     int right[10];
 }Rule;
 
+//declaration of the stack for the parsing
 typedef struct stackNode{
     Token value;
     struct stackNode* next;
@@ -71,7 +75,7 @@ static char precedenceTable[NUM_OPERATORS][NUM_OPERATORS] = {
     { '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', ' ' }  // DOLLAR
 };
 
-
+//rules of the CFG
 static Rule rules[10] = {
     {{S, NULL}, {NUMBER, -1}},                                     //0: S -> i
     {{S, NULL}, {ADD, A, -1}},                                     //1: S -> add A
@@ -84,6 +88,8 @@ static Rule rules[10] = {
     {{A, NULL}, {LPAREN, S, COMMA, S, RPAREN, -1}},                //8: A -> (S,S)
     {{B, NULL}, {LPAREN, S, COMMA, S, COMMA, S, RPAREN, -1}},      //9: B -> (S,S,S)
 };
+
+// functions for the structures used in the parsing:
 
 void push(StackPtr* top, Token value){
     StackPtr newNode = (StackPtr)malloc(sizeof(StackNode));
@@ -99,7 +105,7 @@ void push(StackPtr* top, Token value){
 Token pop(StackPtr* top){
     if (*top == NULL) {
         fprintf(stderr, "Stack is empty!\n");
-        exit(EXIT_FAILURE); // Consider returning a default Token or handling this case differently
+        exit(EXIT_FAILURE); 
     }
     Token value = (*top)->value;
     StackPtr temp = *top;
@@ -131,7 +137,8 @@ TreeNodePtr popTree(StackTreePtr* top) {
     return value;
 }
 
-
+//this function prints the stack for debugging purposes
+//now is not used
 void printStack(StackPtr stack) {
     if (stack == NULL) {
         printf("Stack is empty\n");
@@ -202,6 +209,8 @@ void semanticAction4(StackTreePtr* stackTree, Token token){
     (*stackTree)->value->data = token.value;
 }
 
+//this function prints the abstract syntax tree for debugging purposes
+//now is not used
 void printTree(TreeNodePtr tree){
     if (tree == NULL) return;
     printTree(tree->left);
@@ -209,39 +218,29 @@ void printTree(TreeNodePtr tree){
     printTree(tree->right);
 }
 
+//this function returns the precedence of the operator
+//I used it to insert the parentheses in the output string when needed
 int getPrecedence(const char* op) {
     if (op == NULL) return 0;
-    
-    // Ternary operator has lowest precedence
     if (op[0] == ':') return 1;
-    
-    // Addition and subtraction
     if (op[0] == '+' || op[0] == '-') return 2;
-    
-    // Multiplication, division, modulo
     if (op[0] == '*' || op[0] == '/' || op[0] == '%') return 3;
-    
-    // Exponentiation has highest precedence
     if (op[0] == '^') return 4;
-    
-    // Return 0 for non-operators (numbers)
     return 0;
 }
 
-
+//this function creates the output string using the abstract syntax tree, it also inserts the parentheses when needed
 char* finalOutput(TreeNodePtr tree, char* output) {
     if (tree == NULL) return output;
 
-    // Allocate memory for the output if not already done
     if (output == NULL) {
-        output = (char*)malloc(256 * sizeof(char)); // Adjust size as needed
-        output[0] = '\0'; // Initialize as an empty string
+        output = (char*)malloc(256 * sizeof(char)); 
+        output[0] = '\0';
     }
 
-    // Determine if parentheses are needed based on operator precedence
+    // Here I check if the parentheses are needed based on the precedence of the operators
     int needParens = 0;
     if (tree->left && getPrecedence(tree->data) && getPrecedence(tree->left->data)) {
-        // Check if the current node's operator has lower precedence than its children
         if (getPrecedence(tree->data) > getPrecedence(tree->left->data)) {
             needParens = 1;
         }
@@ -252,7 +251,7 @@ char* finalOutput(TreeNodePtr tree, char* output) {
 
     if (needParens) strcat(output, "( ");
 
-    // Traverse left subtree
+    //left subtree
     output = finalOutput(tree->left, output);
 
     if (needParens){
@@ -262,10 +261,10 @@ char* finalOutput(TreeNodePtr tree, char* output) {
 
     // Append current node's data
     strcat(output, tree->data);
-    strcat(output, " "); // Add space for separation
+    strcat(output, " "); // I add a space to separate the operators
 
+    // same as before but for the right subtree
     if (tree->right && getPrecedence(tree->data) && getPrecedence(tree->right->data)) {
-        // Check if the current node's operator has lower precedence than its children
         if (getPrecedence(tree->data) > getPrecedence(tree->right->data)) {
             needParens = 1;
         }
@@ -276,7 +275,7 @@ char* finalOutput(TreeNodePtr tree, char* output) {
 
     if (needParens) strcat(output, "( ");
 
-    // Traverse right subtree
+    //right subtree
     output = finalOutput(tree->right, output);
 
     if (needParens){
@@ -289,24 +288,23 @@ char* finalOutput(TreeNodePtr tree, char* output) {
 }
 
 char* parse(Token* tokens) {
-    StackPtr stack = NULL;
-    Token endToken;
-    TreeNodePtr tree = NULL;
-    Token stackTop;
-    Token symbol1;
-    Token memory[50];
-    char action;
-    char* output=NULL;
-    int n, i, j, flag;
-    StackTreePtr stackTree = NULL;
-    symbol1.type = P;   //<
-    endToken.type = END;
-    endToken.value = (char*)malloc(2*sizeof(char));
-    endToken.value[0] = '$';
+    StackPtr stack = NULL;      //stack for parsing
+    Token endToken;             //end symbol, first symbol of the stack
+    Token stackTop;             //top of the stack 
+    Token symbol1;              //token with the symbol < to help in parsing
+    Token memory[50];           //I used this array of token to store the elements that were on the top of the stack when a rule was applied
+    char action;                //action to be taken
+    char* output=NULL;          //output string
+    int n, i, j, flag;          //some variables for loops and flags
+    StackTreePtr stackTree = NULL; //this stack help me create the abstract syntax tree
+    symbol1.type = P;              //P is the type that I gave to the symbol <
+    endToken.type = END;           //END is the type that I gave to the end symbol
+    endToken.value = (char*)malloc(2*sizeof(char));     //allocate memory for the end symbol
+    endToken.value[0] = '$';                           
     endToken.value[1] = '\0';
-    push(&stack, endToken);
+    push(&stack, endToken);        //push the end symbol to the stack
     while(1){
-        stackTop = pop(&stack);
+        stackTop = pop(&stack);      //here I pop the top of the stack to use for determining the action to be taken
         if (stackTop.type == S && stack->value.type == END && tokens->type == END){
             break;
         }
@@ -319,7 +317,7 @@ char* parse(Token* tokens) {
         else if (tokens->type == END){
             action = '>';
         }
-        else action = precedenceTable[stackTop.type][tokens->type];
+        else action = precedenceTable[stackTop.type][tokens->type]; //here I use the precedence table to determine the action to be taken
         switch(action){
             case '=':
                 push(&stack, stackTop);
@@ -334,23 +332,27 @@ char* parse(Token* tokens) {
                 break;
             case '>':
                 n=0;
+                //here I store the elements that are on the top of the stack in the memory array until I find the symbol <
                 while(stackTop.type != P && stackTop.type!=END){
                     memory[n++]=stackTop;
                     stackTop=pop(&stack);
                 }
+                //if the stack top is not < there were no < in the stack so there is a syntax error
                 if (stackTop.type != P || n>7){     //if n>7 then there is no rule to apply
                     output = (char*)malloc(14*sizeof(char));
-                    strcpy(output, "Syntax Error!1");
+                    strcpy(output, "Syntax Error!");
                     return output;
                 }
                 for(i=0; i<10; i++){
                     flag=0;
                     for(j=0; j<n; j++){
-                        if(rules[i].right[j]!=memory[n-j-1].type){
+                        // here I check the memory from the end to the beginning to see if the rule is applicable
+                        if(rules[i].right[j]!=memory[n-j-1].type){  //if the rule is not applicable then flag=1
                             flag=1;
                             break;
                         }
                     }
+                    //if the rule is applicable then I push the left part of the rule to the stack and apply the semantic action corresponding to the rule
                     if(!flag && rules[i].right[n]==-1){
                         push(&stack, rules[i].left);
                         switch (i){
@@ -368,28 +370,24 @@ char* parse(Token* tokens) {
                         break;
                     }
                 }
-                if(flag){
+                if(flag){    //if flag=1 there is no rule applicable then there is a syntax error
                     output = (char*)malloc(14*sizeof(char));
-                    strcpy(output, "Syntax Error!2");
+                    strcpy(output, "Syntax Error!");
                     return output;
                 }
                 break;
             }
-        
-        printStack(stack);
-        printf("\n");
+        // I used this two function to check the stack
+        //printStack(stack);
+        //printf("\n");
     }
-    if (stack->value.type == END){
-        //printTree(stackTree->value);
+    if (stack->value.type == END){   //if the stack top is the end symbol then I create the output string
         output = finalOutput(stackTree->value, output);
-        //output+=2;
-        //output[strlen(output)-1] = '\0';
-        printTree(stackTree->value);
         return output;
     }
     else{
         output = (char*)malloc(14*sizeof(char));
-        strcpy(output, "Syntax Error!3");
+        strcpy(output, "Syntax Error!");
         return output;
     }
 }
