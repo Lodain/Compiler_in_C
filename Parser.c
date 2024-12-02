@@ -4,25 +4,30 @@
 
 #define NUM_OPERATORS 13
 
-// Define operators
-enum Operators {
-    ADD, SUB, MUL, DIV, MOD, POW, TERN, COMMA, LPAREN, RPAREN, I, DOLLAR
-};
-
 typedef enum {
-    TOKEN_NUMBER,
-    TOKEN_OPERATOR,
-    TOKEN_FUNCTION,
-    TOKEN_PAREN_OPEN,
-    TOKEN_PAREN_CLOSE,
-    TOKEN_COMMA,
-    TOKEN_END
+    ADD=0,    //0
+    SUB,    //1
+    MUL,    //2
+    DIV,    //3
+    MOD,    //4
+    POW,    //5
+    TERN,   //6
+    COMMA,  //7
+    LPAREN, //8
+    RPAREN, //9
+    NUMBER, //10
+    END,    //11
+    ERROR,  //12
+    P,      //13    <
+    A,      //14
+    B,      //15
+    S,      //16
 } TokenType;
 
 // Define a token structure
 typedef struct {
     TokenType type;
-    char value[32];
+    char *value;
 } Token;
 
 typedef struct treeNode{
@@ -33,9 +38,15 @@ typedef struct treeNode{
 typedef TreeNode *TreeNodePtr;
 
 typedef struct {
-    char left;
-    char right[10];
+    Token left;
+    int right[10];
 }Rule;
+
+typedef struct stackNode{
+    Token value;
+    struct stackNode* next;
+} StackNode;
+typedef StackNode* StackPtr;
 
 // Precedence table
 static char precedenceTable[NUM_OPERATORS][NUM_OPERATORS] = {
@@ -54,19 +65,205 @@ static char precedenceTable[NUM_OPERATORS][NUM_OPERATORS] = {
     { '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', ' ' }  // DOLLAR
 };
 
+
 static Rule rules[10] = {
-    {'S', "i"},         //1: S -> i
-    {'S', "add A"},     //2: S -> add A
-    {'S', "sub A"},     //3: S -> sub A
-    {'S', "mul A"},     //4: S -> mul A
-    {'S', "div A"},     //5: S -> div A
-    {'S', "mod A"},     //6: S -> mod A
-    {'S', "pow A"},     //7: S -> pow A
-    {'S', "tern B"},    //8: S -> tern B
-    {'A', "(S,S)"},     //9: A -> (S,S)
-    {'B', "(S,S,S)"},   //10: B -> (S,S,S)
+    {{S, NULL}, {NUMBER, -1}},                                     //0: S -> i
+    {{S, NULL}, {ADD, A, -1}},                                     //1: S -> add A
+    {{S, NULL}, {SUB, A, -1}},                                     //2: S -> sub A
+    {{S, NULL}, {MUL, A, -1}},                                     //3: S -> mul A
+    {{S, NULL}, {DIV, A, -1}},                                     //4: S -> div A
+    {{S, NULL}, {MOD, A, -1}},                                     //5: S -> mod A
+    {{S, NULL}, {POW, A, -1}},                                     //6: S -> pow A
+    {{S, NULL}, {TERN, B, -1}},                                    //7: S -> tern B
+    {{A, NULL}, {LPAREN, S, COMMA, S, RPAREN, -1}},                //8: A -> (S,S)
+    {{B, NULL}, {LPAREN, S, COMMA, S, COMMA, S, RPAREN, -1}},      //9: B -> (S,S,S)
 };
 
-char* parse(Token* tokens, int numTokens) {
-
+void push(StackPtr* top, Token value){
+    StackPtr newNode = (StackPtr)malloc(sizeof(StackNode));
+    if (newNode == NULL) {
+        fprintf(stderr, "Memory allocation failed!\n");
+        exit(EXIT_FAILURE);
+    }
+    newNode->value = value;
+    newNode->next = *top;
+    *top = newNode;
 }
+
+Token pop(StackPtr* top){
+    if (*top == NULL) {
+        fprintf(stderr, "Stack is empty!\n");
+        exit(EXIT_FAILURE); // Consider returning a default Token or handling this case differently
+    }
+    Token value = (*top)->value;
+    StackPtr temp = *top;
+    *top = (*top)->next;
+    free(temp);
+    return value;
+}
+
+void printStack(StackPtr stack) {
+    if (stack == NULL) {
+        printf("Stack is empty\n");
+        return;
+    }
+    
+    StackPtr current = stack;
+    printf("Stack (top to bottom): ");
+    while (current != NULL) {
+        printf("%d ", current->value.type);
+        current = current->next;
+    }
+}
+
+
+char* tokenToString(Token* tokens, int n){
+    int i=0;
+    char* output=(char*)malloc(sizeof(char));
+    output[0]='\0';
+    for(i=0; i<n; i++){
+        output = (char*)realloc(output, (strlen(output)+strlen(tokens[i].value))*sizeof(char));
+        strcat(output, tokens[i].value);
+    }
+    return output;
+}
+
+char* parse(Token* tokens) {
+    StackPtr stack = NULL;
+    Token endToken;
+    TreeNodePtr tree = NULL;
+    Token stackTop;
+    Token symbol1, s;
+    Token memory[50];
+    char action;
+    char* output=NULL;
+    int n, i, j, flag;
+    s.type = S;
+    symbol1.type = P;   //<
+    endToken.type = END;
+    endToken.value = (char*)malloc(2*sizeof(char));
+    endToken.value[0] = '$';
+    endToken.value[1] = '\0';
+    stack = (StackPtr)malloc(sizeof(StackNode));
+    if (stack == NULL) {
+        fprintf(stderr, "Memory allocation failed!\n");
+        exit(EXIT_FAILURE);
+    }
+    stack->value = endToken;
+    stack->next = NULL;
+    
+    while(1){
+        stackTop = pop(&stack);
+        if (stackTop.type == S && stack->value.type == END){
+            break;
+        }
+        //printf("%d - ", tokens->type);
+        //printf("%c", precedenceTable[stackTop.type][tokens->type]);
+        if ((stackTop.type == A || stackTop.type == B || stackTop.type == S) && tokens->type != END){
+            push(&stack, stackTop);
+            push(&stack, *tokens);
+            tokens++;
+        }
+        else{
+            if (tokens->type == END){
+                action = '>';
+            }
+            else action = precedenceTable[stackTop.type][tokens->type];
+            switch(action){
+                case '=':
+                push(&stack, stackTop);
+                push(&stack, *tokens);
+                tokens++;
+                break;
+            case '<':
+                push(&stack, stackTop);
+                push(&stack, symbol1);
+                push(&stack, *tokens);
+                tokens++;
+                break;
+            case '>':
+                n=0;
+                while(stackTop.type != P && stackTop.type!=END){
+                    memory[n++]=stackTop;
+                    stackTop=pop(&stack);
+                }
+                if (stackTop.type != P || n>7){     //if n>7 then there is no rule to apply
+                    output = (char*)malloc(14*sizeof(char));
+                    strcpy(output, "Syntax Error!1");
+                    return output;
+                }
+                for(i=0; i<10; i++){
+                    flag=0;
+                    for(j=0; j<n; j++){
+                        if(rules[i].right[j]!=memory[n-j-1].type){
+                            flag=1;
+                            break;
+                        }
+                    }
+                    if(!flag && rules[i].right[n]==-1){
+                        push(&stack, rules[i].left);
+                        break;
+                    }
+                }
+                if(flag){
+                    output = (char*)malloc(14*sizeof(char));
+                    strcpy(output, "Syntax Error!2");
+                    return output;
+                }
+                break;
+            }
+        }
+        printStack(stack);
+        printf("\n");
+    }
+    if (stack->value.type == END){
+        output = (char*)malloc(14*sizeof(char));
+        strcpy(output, "true!");
+        return output;
+    }
+    else{
+        output = (char*)malloc(14*sizeof(char));
+        strcpy(output, "Syntax Error!3");
+        return output;
+    }
+}
+
+int main() {
+    Token tokens[] = {
+        {ADD, NULL},
+        {LPAREN, NULL}, 
+        {NUMBER, "5"},
+        {COMMA, NULL},
+        {MUL, NULL},
+        {LPAREN, NULL},
+        {NUMBER, "3"},
+        {COMMA, NULL},
+        {SUB, NULL},
+        {LPAREN, NULL},
+        {NUMBER, "10"},
+        {COMMA, NULL},
+        {POW, NULL},
+        {LPAREN, NULL},
+        {NUMBER, "6"},
+        {COMMA, NULL},
+        {NUMBER, "4"},
+        {RPAREN, NULL},
+        {RPAREN, NULL},
+        {RPAREN, NULL},
+        {RPAREN, NULL},
+        {END, NULL}
+    };
+    int i=0;
+    while(tokens[i].type != END){
+        printf("%d ", tokens[i].type);
+        i++;
+    }
+    printf("\n");
+    
+    char* result = parse(tokens);
+    printf("Parse result: %s\n", result);
+    free(result);
+    
+    return 0;
+}
+

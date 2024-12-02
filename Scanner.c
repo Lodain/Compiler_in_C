@@ -6,13 +6,19 @@
 #include <ctype.h>
 
 typedef enum {
-    NUMBER,
-    OPERATOR,
-    COMMA,
-    LEFT_PARENTHESIS,
-    RIGHT_PARENTHESIS,
-    END,
-    ERROR
+    ADD,    //0
+    SUB,    //1
+    MUL,    //2
+    DIV,    //3
+    MOD,    //4
+    POW,    //5
+    TERN,   //6
+    COMMA,  //7
+    LPAREN, //8
+    RPAREN, //9
+    NUMBER, //10
+    END,    //11
+    ERROR   //12
 } TokenType;
 
 typedef struct {
@@ -156,10 +162,12 @@ Token* scan(char* code){
             if (!errorFlag){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
-                tokens[tokenNumber-1].type=OPERATOR;
-                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
-                tokens[tokenNumber-1].value[0]='+';
-                tokens[tokenNumber-1].value[1]='\0';
+                tokens[tokenNumber-1].type=ADD;
+                tokens[tokenNumber-1].value=(char*)malloc(4*sizeof(char));
+                tokens[tokenNumber-1].value[0]='a';
+                tokens[tokenNumber-1].value[1]='d';
+                tokens[tokenNumber-1].value[2]='d';
+                tokens[tokenNumber-1].value[3]='\0';
                 start=sourceCode;
             }
         }
@@ -210,10 +218,12 @@ Token* scan(char* code){
             if (!errorFlag){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
-                tokens[tokenNumber-1].type=OPERATOR;
-                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
-                tokens[tokenNumber-1].value[0]='-';
-                tokens[tokenNumber-1].value[1]='\0';
+                tokens[tokenNumber-1].type=SUB;
+                tokens[tokenNumber-1].value=(char*)malloc(4*sizeof(char));
+                tokens[tokenNumber-1].value[0]='s';
+                tokens[tokenNumber-1].value[1]='u';
+                tokens[tokenNumber-1].value[2]='b';
+                tokens[tokenNumber-1].value[3]='\0';
                 start=sourceCode;
             }
         }
@@ -264,10 +274,12 @@ Token* scan(char* code){
             if (!errorFlag){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
-                tokens[tokenNumber-1].type=OPERATOR;
-                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
-                tokens[tokenNumber-1].value[0]='/';
-                tokens[tokenNumber-1].value[1]='\0';
+                tokens[tokenNumber-1].type=DIV;
+                tokens[tokenNumber-1].value=(char*)malloc(4*sizeof(char));
+                tokens[tokenNumber-1].value[0]='d';
+                tokens[tokenNumber-1].value[1]='i';
+                tokens[tokenNumber-1].value[2]='v';
+                tokens[tokenNumber-1].value[3]='\0';
                 start=sourceCode;
             }
         }
@@ -318,10 +330,12 @@ Token* scan(char* code){
             if (!errorFlag){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
-                tokens[tokenNumber-1].type=OPERATOR;
+                tokens[tokenNumber-1].type=POW;
                 tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
-                tokens[tokenNumber-1].value[0]='^';
-                tokens[tokenNumber-1].value[1]='\0';
+                tokens[tokenNumber-1].value[0]='p';
+                tokens[tokenNumber-1].value[1]='o';
+                tokens[tokenNumber-1].value[2]='w';
+                tokens[tokenNumber-1].value[3]='\0';
                 start=sourceCode;
             }
         }
@@ -384,10 +398,13 @@ Token* scan(char* code){
             if (!errorFlag){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
-                tokens[tokenNumber-1].type=OPERATOR;
-                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
-                tokens[tokenNumber-1].value[0]='?';
-                tokens[tokenNumber-1].value[1]='\0';
+                tokens[tokenNumber-1].type=TERN;
+                tokens[tokenNumber-1].value=(char*)malloc(5*sizeof(char));
+                tokens[tokenNumber-1].value[0]='t';
+                tokens[tokenNumber-1].value[1]='e';
+                tokens[tokenNumber-1].value[2]='r';
+                tokens[tokenNumber-1].value[3]='n';
+                tokens[tokenNumber-1].value[4]='\0';
                 start=sourceCode;
             }
         }
@@ -462,13 +479,22 @@ Token* scan(char* code){
             if (!errorFlag){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
-                tokens[tokenNumber-1].type=OPERATOR;
-                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
-                if (state==5)
-                    tokens[tokenNumber-1].value[0]='%';
-                else
-                    tokens[tokenNumber-1].value[0]='*';
-                tokens[tokenNumber-1].value[1]='\0';
+                
+                tokens[tokenNumber-1].value=(char*)malloc(4*sizeof(char));
+                if (state==5){
+                    tokens[tokenNumber-1].type=MOD;
+                    tokens[tokenNumber-1].value[0]='m';
+                    tokens[tokenNumber-1].value[1]='o';
+                    tokens[tokenNumber-1].value[2]='d';
+                }
+                else{
+                    tokens[tokenNumber-1].type=MUL;
+                    tokens[tokenNumber-1].value[0]='m';
+                    tokens[tokenNumber-1].value[1]='u';
+                    tokens[tokenNumber-1].value[2]='l';
+                }
+                    
+                tokens[tokenNumber-1].value[3]='\0';
                 start=sourceCode;
             }
         }
@@ -486,7 +512,7 @@ Token* scan(char* code){
             sourceCode++;
             tokenNumber++;
             tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
-            tokens[tokenNumber-1].type=LEFT_PARENTHESIS;
+            tokens[tokenNumber-1].type=LPAREN;
             tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
             tokens[tokenNumber-1].value[0]='(';
             tokens[tokenNumber-1].value[1]='\0';
@@ -496,7 +522,7 @@ Token* scan(char* code){
             sourceCode++;
             tokenNumber++;
             tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
-            tokens[tokenNumber-1].type=RIGHT_PARENTHESIS;
+            tokens[tokenNumber-1].type=RPAREN;
             tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
             tokens[tokenNumber-1].value[0]=')';
             tokens[tokenNumber-1].value[1]='\0';
@@ -552,7 +578,7 @@ char* removeWhitespaceAndComments(char* source) {
 }
 
 void main(){
-    char string[50]="gadd(5, mul(3, sub(10, pow(6, 4))))";
+    char string[50]="add(5, mul(3, sub(10, pow(6, 4))))";
     Token* tokens=scan(string);
     for (int i=0;tokens[i].type!=END;i++){
         printf("%s  ", tokens[i].value );
