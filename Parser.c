@@ -392,6 +392,7 @@ char* parse(Token* tokens) {
     }
 }
 
+/*
 int main() {
     
     Token tokens[] = {
@@ -507,7 +508,6 @@ int main() {
         {RPAREN, ")"},
         {END, NULL}
     };
-    */
     
     char* result = parse(tokens6);
     printf("Parse result: %s\n", result);
@@ -515,4 +515,4 @@ int main() {
     
     return 0;
 }
-
+*/

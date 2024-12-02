@@ -562,7 +562,7 @@ char* removeWhitespaceAndComments(char* source) {
     result[index] = '\0'; // Null-terminate the result string
     return result;
 }
-
+/*
 void main(){
     char string[50]="add(5, mul(3, sub(10, pow(6, 4))))";
     Token* tokens=scan(string);
@@ -571,3 +571,4 @@ void main(){
     }
     free(tokens);
 }
+*/
