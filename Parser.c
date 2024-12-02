@@ -154,18 +154,19 @@ char* parse(Token* tokens) {
     
     while(1){
         stackTop = pop(&stack);
-        if (stackTop.type == S && stack->value.type == END){
+        if (stackTop.type == S && stack->value.type == END && tokens->type == END){
             break;
         }
         //printf("%d - ", tokens->type);
         //printf("%c", precedenceTable[stackTop.type][tokens->type]);
         if ((stackTop.type == A || stackTop.type == B || stackTop.type == S) && tokens->type != END){
-            push(&stack, stackTop);
-            push(&stack, *tokens);
-            tokens++;
+            if ((stackTop.type == A || stackTop.type == B) && tokens->type == RPAREN){
+                action = '>';
+            }
+            else action ='=';
+            
         }
-        else{
-            if (tokens->type == END){
+        else if (tokens->type == END){
                 action = '>';
             }
             else action = precedenceTable[stackTop.type][tokens->type];
@@ -212,7 +213,7 @@ char* parse(Token* tokens) {
                 }
                 break;
             }
-        }
+        
         printStack(stack);
         printf("\n");
     }
@@ -229,6 +230,7 @@ char* parse(Token* tokens) {
 }
 
 int main() {
+    /*
     Token tokens[] = {
         {ADD, NULL},
         {LPAREN, NULL}, 
@@ -250,6 +252,17 @@ int main() {
         {RPAREN, NULL},
         {RPAREN, NULL},
         {RPAREN, NULL},
+        {RPAREN, NULL},
+        {END, NULL}
+    };*/
+    Token tokens[] = {
+        {TERN, NULL},
+        {LPAREN, NULL},
+        {NUMBER, "1"},
+        {COMMA, NULL},
+        {NUMBER, "2"},
+        {COMMA, NULL},
+        {NUMBER, "3"},
         {RPAREN, NULL},
         {END, NULL}
     };
