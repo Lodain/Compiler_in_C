@@ -1,0 +1,4 @@
+add(5, mul(3, sub(10, pow(6, 4))))
+pow(pow(2,3),1)
+tern(5e2, 2.7,1)
+tern(1,tern(2, 3, 4) ,5)

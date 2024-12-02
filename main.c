@@ -2,15 +2,13 @@
 #include "Parser.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-int main() {
-    char code[] = "add(5, mul(3, sub(10, pow(6, 4))))";
-    Token* tokens; 
-    char* result;
-    tokens = scan(code);
-    result = parse(tokens);
-
-    printf("Parse result: %s\n", result);
+void runExample(const char* input) {
+    printf("Input: %s\n", input);
+    Token* tokens = scan((char*)input);
+    char* result = parse(tokens);
+    printf("Output: %s\n\n", result);
 
     // Free allocated memory
     free(result);
@@ -18,6 +16,22 @@ int main() {
         free(tokens[i].value);
     }
     free(tokens);
+}
 
+int main() {
+    FILE *file = fopen("test.txt", "r");
+    if (file == NULL) {
+        fprintf(stderr, "Could not open test.txt\n");
+        return 1;
+    }
+
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        // Remove newline character if present
+        line[strcspn(line, "\n")] = '\0';
+        runExample(line);
+    }
+
+    fclose(file);
     return 0;
 }
