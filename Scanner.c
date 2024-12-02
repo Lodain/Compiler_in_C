@@ -538,6 +538,7 @@ Token* scan(char* code){
     return tokens;
 }
 
+//this function is used to remove the whitespace and comments from the source code
 char* removeWhitespaceAndComments(char* source) {
     int inComment = 0;
     int index = 0;
@@ -546,16 +547,18 @@ char* removeWhitespaceAndComments(char* source) {
 
     for (int i = 0; i < length; i++) {
         if (!inComment && i + 1 < length && source[i] == '/' && source[i + 1] == '*') {
-            inComment = 1; // Entering a comment block
-            i++; // Skip the '*' character
-        } else if (inComment && i + 1 < length && source[i] == '*' && source[i + 1] == '/') {
-            inComment = 0; // Exiting a comment block
-            i++; // Skip the '/' character
-        } else if (!inComment && !isspace((unsigned char)source[i])) {
-            result[index++] = source[i]; // Copy non-whitespace and non-comment characters
+            inComment = 1; 
+            i++; 
+        } 
+        else if (inComment && i + 1 < length && source[i] == '*' && source[i + 1] == '/') {
+            inComment = 0; 
+            i++; 
+        } 
+        else if (!inComment && !isspace((unsigned char)source[i])) {
+            result[index++] = source[i];
         }
     }
 
-    result[index] = '\0'; // Null-terminate the result string
+    result[index] = '\0'; 
     return result;
 }

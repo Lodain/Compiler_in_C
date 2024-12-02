@@ -18,7 +18,7 @@ typedef enum {
     NUMBER, //10
     END,    //11
     ERROR,  //12
-    P,      //13    <
+    P,      //13    symbol '<'
     A,      //14
     B,      //15
     S,      //16
@@ -222,10 +222,10 @@ void printTree(TreeNodePtr tree){
 //I used it to insert the parentheses in the output string when needed
 int getPrecedence(const char* op) {
     if (op == NULL) return 0;
-    if (op[0] == ':') return 1;
-    if (op[0] == '+' || op[0] == '-') return 2;
-    if (op[0] == '*' || op[0] == '/' || op[0] == '%') return 3;
-    if (op[0] == '^') return 4;
+    if (strcmp(op, "?") == 0) return 1;
+    if (strcmp(op, "+") == 0 || strcmp(op, "-") == 0) return 2;
+    if (strcmp(op, "*") == 0 || strcmp(op, "/") == 0 || strcmp(op, "%") == 0) return 3;
+    if (strcmp(op, "^") == 0) return 4;
     return 0;
 }
 
@@ -241,11 +241,11 @@ char* finalOutput(TreeNodePtr tree, char* output) {
     // Here I check if the parentheses are needed based on the precedence of the operators
     int needParens = 0;
     if (tree->left && getPrecedence(tree->data) && getPrecedence(tree->left->data)) {
-        if (getPrecedence(tree->data) > getPrecedence(tree->left->data)) {
-            needParens = 1;
-        }
-        else if (getPrecedence(tree->data) == 4 && getPrecedence(tree->left->data) == 4){
-            needParens = 1;
+        if (getPrecedence(tree->data) >= getPrecedence(tree->left->data)) {
+            if (getPrecedence(tree->data) == 2 && getPrecedence(tree->left->data) == 2){
+                needParens = 0;
+            }
+            else needParens = 1;
         }
     }
 
@@ -265,11 +265,11 @@ char* finalOutput(TreeNodePtr tree, char* output) {
 
     // same as before but for the right subtree
     if (tree->right && getPrecedence(tree->data) && getPrecedence(tree->right->data)) {
-        if (getPrecedence(tree->data) > getPrecedence(tree->right->data)) {
-            needParens = 1;
-        }
-        else if (getPrecedence(tree->data) == 4 && getPrecedence(tree->right->data) == 4){
-            needParens = 1;
+        if (getPrecedence(tree->data) >= getPrecedence(tree->right->data)) {
+            if (getPrecedence(tree->data) == 2 && getPrecedence(tree->left->data) == 2){
+                needParens = 0;
+            }
+            else needParens = 1;
         }
     }
 
