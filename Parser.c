@@ -37,6 +37,12 @@ typedef struct treeNode{
 } TreeNode;
 typedef TreeNode *TreeNodePtr;
 
+typedef struct stackTree{
+    TreeNodePtr value;
+    struct stackTree* next;
+} StackTree;
+typedef StackTree* StackTreePtr;
+
 typedef struct {
     Token left;
     int right[10];
@@ -102,6 +108,30 @@ Token pop(StackPtr* top){
     return value;
 }
 
+void pushTree(StackTreePtr* top, TreeNodePtr value) {
+    StackTreePtr newNode = (StackTreePtr)malloc(sizeof(StackTree));
+    if (newNode == NULL) {
+        fprintf(stderr, "Memory allocation failed!\n");
+        exit(EXIT_FAILURE);
+    }
+    newNode->value = value;
+    newNode->next = *top;
+    *top = newNode;
+}
+
+TreeNodePtr popTree(StackTreePtr* top) {
+    if (*top == NULL) {
+        fprintf(stderr, "Stack is empty!\n");
+        exit(EXIT_FAILURE);
+    }
+    TreeNodePtr value = (*top)->value;
+    StackTreePtr temp = *top;
+    *top = (*top)->next;
+    free(temp);
+    return value;
+}
+
+
 void printStack(StackPtr stack) {
     if (stack == NULL) {
         printf("Stack is empty\n");
@@ -111,22 +141,29 @@ void printStack(StackPtr stack) {
     StackPtr current = stack;
     printf("Stack (top to bottom): ");
     while (current != NULL) {
-        printf("%d ", current->value.type);
+        switch(current->value.type){
+            case ADD: printf("ADD "); break;
+            case SUB: printf("SUB "); break;
+            case MUL: printf("MUL "); break;
+            case DIV: printf("DIV "); break;
+            case MOD: printf("MOD "); break;
+            case POW: printf("POW "); break;
+            case TERN: printf("TERN "); break;
+            case COMMA: printf("COMMA "); break;
+            case LPAREN: printf("( "); break;
+            case RPAREN: printf(") "); break;
+            case NUMBER: printf("i "); break;
+            case END: printf("END "); break;
+            case ERROR: printf("ERROR "); break;
+            case P: printf("P "); break;
+            case A: printf("A "); break;
+            case B: printf("B "); break;
+            case S: printf("S "); break;
+        }
         current = current->next;
     }
 }
 
-
-char* tokenToString(Token* tokens, int n){
-    int i=0;
-    char* output=(char*)malloc(sizeof(char));
-    output[0]='\0';
-    for(i=0; i<n; i++){
-        output = (char*)realloc(output, (strlen(output)+strlen(tokens[i].value))*sizeof(char));
-        strcat(output, tokens[i].value);
-    }
-    return output;
-}
 
 char* parse(Token* tokens) {
     StackPtr stack = NULL;
@@ -144,14 +181,7 @@ char* parse(Token* tokens) {
     endToken.value = (char*)malloc(2*sizeof(char));
     endToken.value[0] = '$';
     endToken.value[1] = '\0';
-    stack = (StackPtr)malloc(sizeof(StackNode));
-    if (stack == NULL) {
-        fprintf(stderr, "Memory allocation failed!\n");
-        exit(EXIT_FAILURE);
-    }
-    stack->value = endToken;
-    stack->next = NULL;
-    
+    push(&stack, endToken);
     while(1){
         stackTop = pop(&stack);
         if (stackTop.type == S && stack->value.type == END && tokens->type == END){
@@ -160,18 +190,17 @@ char* parse(Token* tokens) {
         //printf("%d - ", tokens->type);
         //printf("%c", precedenceTable[stackTop.type][tokens->type]);
         if ((stackTop.type == A || stackTop.type == B || stackTop.type == S) && tokens->type != END){
-            if ((stackTop.type == A || stackTop.type == B) && tokens->type == RPAREN){
+            if ((stackTop.type == A || stackTop.type == B) && (tokens->type == RPAREN || tokens->type == COMMA)){
                 action = '>';
             }
             else action ='=';
-            
         }
         else if (tokens->type == END){
-                action = '>';
-            }
-            else action = precedenceTable[stackTop.type][tokens->type];
-            switch(action){
-                case '=':
+            action = '>';
+        }
+        else action = precedenceTable[stackTop.type][tokens->type];
+        switch(action){
+            case '=':
                 push(&stack, stackTop);
                 push(&stack, *tokens);
                 tokens++;
@@ -256,13 +285,16 @@ int main() {
         {END, NULL}
     };*/
     Token tokens[] = {
-        {TERN, NULL},
+        {ADD, NULL},
+        {LPAREN, NULL},
+        {ADD, NULL},
         {LPAREN, NULL},
         {NUMBER, "1"},
         {COMMA, NULL},
         {NUMBER, "2"},
+        {RPAREN, NULL},
         {COMMA, NULL},
-        {NUMBER, "3"},
+        {NUMBER, "2"},
         {RPAREN, NULL},
         {END, NULL}
     };
