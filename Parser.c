@@ -31,7 +31,7 @@ typedef struct {
 } Token;
 
 typedef struct treeNode{
-    int data;
+    char* data;
     struct treeNode *left;
     struct treeNode *right;
 } TreeNode;
@@ -164,6 +164,51 @@ void printStack(StackPtr stack) {
     }
 }
 
+// semantic action corresponding at rule S -> i (i is a number)
+void semanticAction1(StackTreePtr* stackTree, Token token){      
+    TreeNodePtr treeNode = (TreeNodePtr)malloc(sizeof(TreeNode));
+    treeNode->data = token.value;
+    treeNode->left = NULL;
+    treeNode->right = NULL;
+    pushTree(stackTree, treeNode);
+}
+
+// semantic action corresponding at rule A -> (S,S)
+void semanticAction2(StackTreePtr* stackTree){
+    TreeNodePtr treeNode = (TreeNodePtr)malloc(sizeof(TreeNode));
+    treeNode->data = NULL;
+    treeNode->right = popTree(stackTree);
+    treeNode->left = popTree(stackTree);
+    pushTree(stackTree, treeNode);
+}
+
+// semantic action corresponding at rule B -> (S,S,S)
+void semanticAction3(StackTreePtr* stackTree){
+    TreeNodePtr treeNode = (TreeNodePtr)malloc(sizeof(TreeNode));
+    TreeNodePtr treeNode2 = (TreeNodePtr)malloc(sizeof(TreeNode));
+    treeNode->data = NULL;
+    treeNode2->data = (char*)malloc(2*sizeof(char));
+    treeNode2->data[0] = ':';
+    treeNode2->data[1] = '\0';
+    treeNode2->right = popTree(stackTree);
+    treeNode2->left = popTree(stackTree);
+    treeNode->right = treeNode2;
+    treeNode->left = popTree(stackTree);
+    pushTree(stackTree, treeNode);
+}
+
+// semantic action corresponding at rule S -> add A, sub A, mul A, div A, mod A, pow A, tern B
+void semanticAction4(StackTreePtr* stackTree, Token token){
+    (*stackTree)->value->data = token.value;
+}
+
+void printTree(TreeNodePtr tree){
+    if (tree == NULL) return;
+    printTree(tree->left);
+    printf("%s ", tree->data);
+    printTree(tree->right);
+}
+
 
 char* parse(Token* tokens) {
     StackPtr stack = NULL;
@@ -175,6 +220,7 @@ char* parse(Token* tokens) {
     char action;
     char* output=NULL;
     int n, i, j, flag;
+    StackTreePtr stackTree = NULL;
     symbol1.type = P;   //<
     endToken.type = END;
     endToken.value = (char*)malloc(2*sizeof(char));
@@ -229,6 +275,18 @@ char* parse(Token* tokens) {
                     }
                     if(!flag && rules[i].right[n]==-1){
                         push(&stack, rules[i].left);
+                        switch (i){
+                            case 0: semanticAction1(&stackTree, memory[n-1]); break;
+                            case 1:
+                            case 2:
+                            case 3:
+                            case 4:
+                            case 5:
+                            case 6:
+                            case 7: semanticAction4(&stackTree, memory[n-1]); break;
+                            case 8: semanticAction2(&stackTree); break;
+                            case 9: semanticAction3(&stackTree); break;
+                        }
                         break;
                     }
                 }
@@ -246,6 +304,7 @@ char* parse(Token* tokens) {
     if (stack->value.type == END){
         output = (char*)malloc(14*sizeof(char));
         strcpy(output, "true!");
+        printTree(stackTree->value);
         return output;
     }
     else{
@@ -256,7 +315,7 @@ char* parse(Token* tokens) {
 }
 
 int main() {
-    
+    /*
     Token tokens[] = {
         {ADD, NULL},
         {LPAREN, NULL}, 
@@ -281,22 +340,23 @@ int main() {
         {RPAREN, NULL},
         {END, NULL}
     };
-    /*
+    */
+    
     Token tokens[] = {
-        {ADD, NULL},
-        {LPAREN, NULL},
-        {ADD, NULL},
-        {LPAREN, NULL},
+        {ADD, "+"},
+        {LPAREN, "("},
+        {ADD, "+"},
+        {LPAREN, "("},
         {NUMBER, "1"},
-        {COMMA, NULL},
+        {COMMA, ","},
         {NUMBER, "2"},
-        {RPAREN, NULL},
-        {COMMA, NULL},
+        {RPAREN, ")"},
+        {COMMA, ","},
         {NUMBER, "2"},
-        {RPAREN, NULL},
+        {RPAREN, ")"},
         {END, NULL}
     };
-    */
+    
     int i=0;
     while(tokens[i].type != END){
         printf("%d ", tokens[i].type);

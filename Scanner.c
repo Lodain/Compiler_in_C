@@ -163,11 +163,9 @@ Token* scan(char* code){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
                 tokens[tokenNumber-1].type=ADD;
-                tokens[tokenNumber-1].value=(char*)malloc(4*sizeof(char));
-                tokens[tokenNumber-1].value[0]='a';
-                tokens[tokenNumber-1].value[1]='d';
-                tokens[tokenNumber-1].value[2]='d';
-                tokens[tokenNumber-1].value[3]='\0';
+                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
+                tokens[tokenNumber-1].value[0]='+';
+                tokens[tokenNumber-1].value[1]='\0';
                 start=sourceCode;
             }
         }
@@ -219,11 +217,9 @@ Token* scan(char* code){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
                 tokens[tokenNumber-1].type=SUB;
-                tokens[tokenNumber-1].value=(char*)malloc(4*sizeof(char));
-                tokens[tokenNumber-1].value[0]='s';
-                tokens[tokenNumber-1].value[1]='u';
-                tokens[tokenNumber-1].value[2]='b';
-                tokens[tokenNumber-1].value[3]='\0';
+                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
+                tokens[tokenNumber-1].value[0]='-';
+                tokens[tokenNumber-1].value[1]='\0';
                 start=sourceCode;
             }
         }
@@ -275,11 +271,9 @@ Token* scan(char* code){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
                 tokens[tokenNumber-1].type=DIV;
-                tokens[tokenNumber-1].value=(char*)malloc(4*sizeof(char));
-                tokens[tokenNumber-1].value[0]='d';
-                tokens[tokenNumber-1].value[1]='i';
-                tokens[tokenNumber-1].value[2]='v';
-                tokens[tokenNumber-1].value[3]='\0';
+                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
+                tokens[tokenNumber-1].value[0]='/';
+                tokens[tokenNumber-1].value[1]='\0';
                 start=sourceCode;
             }
         }
@@ -332,10 +326,8 @@ Token* scan(char* code){
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
                 tokens[tokenNumber-1].type=POW;
                 tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
-                tokens[tokenNumber-1].value[0]='p';
-                tokens[tokenNumber-1].value[1]='o';
-                tokens[tokenNumber-1].value[2]='w';
-                tokens[tokenNumber-1].value[3]='\0';
+                tokens[tokenNumber-1].value[0]='^';
+                tokens[tokenNumber-1].value[1]='\0';
                 start=sourceCode;
             }
         }
@@ -399,12 +391,9 @@ Token* scan(char* code){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
                 tokens[tokenNumber-1].type=TERN;
-                tokens[tokenNumber-1].value=(char*)malloc(5*sizeof(char));
-                tokens[tokenNumber-1].value[0]='t';
-                tokens[tokenNumber-1].value[1]='e';
-                tokens[tokenNumber-1].value[2]='r';
-                tokens[tokenNumber-1].value[3]='n';
-                tokens[tokenNumber-1].value[4]='\0';
+                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
+                tokens[tokenNumber-1].value[0]='?';
+                tokens[tokenNumber-1].value[1]='\0';
                 start=sourceCode;
             }
         }
@@ -480,21 +469,16 @@ Token* scan(char* code){
                 tokenNumber++;
                 tokens=(Token*)realloc(tokens,tokenNumber*sizeof(Token));
                 
-                tokens[tokenNumber-1].value=(char*)malloc(4*sizeof(char));
+                tokens[tokenNumber-1].value=(char*)malloc(2*sizeof(char));
                 if (state==5){
                     tokens[tokenNumber-1].type=MOD;
-                    tokens[tokenNumber-1].value[0]='m';
-                    tokens[tokenNumber-1].value[1]='o';
-                    tokens[tokenNumber-1].value[2]='d';
+                    tokens[tokenNumber-1].value[0]='%';
                 }
                 else{
                     tokens[tokenNumber-1].type=MUL;
-                    tokens[tokenNumber-1].value[0]='m';
-                    tokens[tokenNumber-1].value[1]='u';
-                    tokens[tokenNumber-1].value[2]='l';
+                    tokens[tokenNumber-1].value[0]='*';
                 }
-                    
-                tokens[tokenNumber-1].value[3]='\0';
+                tokens[tokenNumber-1].value[1]='\0';
                 start=sourceCode;
             }
         }
