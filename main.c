@@ -7,6 +7,10 @@
 void runExample(const char* input) {
     printf("Input: %s\n", input);
     Token* tokens = scan((char*)input);
+    if (tokens->type==ERROR){
+        printf("Error: %s\n\n", tokens->value);
+        return;
+    }
     char* result = parse(tokens);
     printf("Output: %s\n\n", result);
 

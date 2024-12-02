@@ -29,7 +29,7 @@ $(EXEC): $(OBJS)
 
 # Clean up build files
 clean:
-	del /Q $(OBJS) $(EXEC)
+	rm -f $(OBJS) $(EXEC)
 
 # Phony targets
 .PHONY: all clean

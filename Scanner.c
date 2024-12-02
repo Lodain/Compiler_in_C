@@ -41,10 +41,12 @@ Token* scan(char* code){
     Token* tokens=NULL; //array of tokens
     int tokenNumber=0; //number of tokens
     char* sourceCode=removeWhitespaceAndComments(code); //source code without whitespace and comments
+    char* first=sourceCode; //first character of the source code
     char* start=sourceCode; //start of the source code
     while (*sourceCode != '\0' && !errorFlag) {
         state=0; //initial state of the FA
         flag=1;
+
         if ((*sourceCode=='+' || *sourceCode=='-') || (*sourceCode >= '0' && *sourceCode <= '9')) { //the input is a number
             while (flag) {
                 if (*sourceCode >= '0' && *sourceCode <= '9') {
@@ -528,15 +530,10 @@ Token* scan(char* code){
     }
     else {    //if the program reached this point and errorFlag is true, then the input is invalid
         free(tokens);
-        tokens=(Token*)malloc(2*sizeof(Token));
+        tokens=(Token*)malloc(sizeof(Token));
         tokens[0].type=ERROR;
-        tokens[0].value=(char*)malloc(2*sizeof(char));
-        tokens[0].value[0]='E';
-        tokens[0].value[1]='\0';
-        tokens[1].type=END;
-        tokens[1].value=(char*)malloc(2*sizeof(char));
-        tokens[1].value[0]='$';
-        tokens[1].value[1]='\0';
+        tokens[0].value=(char*)malloc(50*sizeof(char));
+        sprintf(tokens[0].value, "Lexical error! Position %d", (sourceCode-first)+1);
     }
     return tokens;
 }
@@ -562,13 +559,3 @@ char* removeWhitespaceAndComments(char* source) {
     result[index] = '\0'; // Null-terminate the result string
     return result;
 }
-/*
-void main(){
-    char string[50]="add(5, mul(3, sub(10, pow(6, 4))))";
-    Token* tokens=scan(string);
-    for (int i=0;tokens[i].type!=END;i++){
-        printf("%s  ", tokens[i].value );
-    }
-    free(tokens);
-}
-*/
