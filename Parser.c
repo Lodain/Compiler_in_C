@@ -241,7 +241,7 @@ char* finalOutput(TreeNodePtr tree, char* output) {
     // Here I check if the parentheses are needed based on the precedence of the operators
     int needParens = 0;
     if (tree->left && getPrecedence(tree->data) && getPrecedence(tree->left->data)) {
-        if (getPrecedence(tree->data) >= getPrecedence(tree->left->data)) {
+        if (getPrecedence(tree->data) > getPrecedence(tree->left->data)) {
             if (getPrecedence(tree->data) == 2 && getPrecedence(tree->left->data) == 2){
                 needParens = 0;
             }

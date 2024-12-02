@@ -22,20 +22,25 @@ void runExample(const char* input) {
     free(tokens);
 }
 
-int main() {
-    FILE *file = fopen("test.txt", "r");
-    if (file == NULL) {
-        fprintf(stderr, "Could not open test.txt\n");
-        return 1;
+int main(int argc, char *argv[]) {
+    if (argc >1){
+        for (int i = 0; i < argc; i++){
+            runExample(argv[i]);
+        }
     }
+    else{
+        FILE *file = fopen("test.txt", "r");
+        if (file == NULL) {
+            fprintf(stderr, "Could not open test.txt\n");
+            return 1;
+        }   
 
-    char line[256];
-    while (fgets(line, sizeof(line), file)) {
-        // Remove newline character if present
-        line[strcspn(line, "\n")] = '\0';
-        runExample(line);
+        char line[256];
+        while (fgets(line, sizeof(line), file)) {
+            line[strcspn(line, "\n")] = '\0';
+            runExample(line);
+        }
+        fclose(file);
     }
-
-    fclose(file);
     return 0;
 }
