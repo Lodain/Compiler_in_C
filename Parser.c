@@ -170,12 +170,11 @@ char* parse(Token* tokens) {
     Token endToken;
     TreeNodePtr tree = NULL;
     Token stackTop;
-    Token symbol1, s;
+    Token symbol1;
     Token memory[50];
     char action;
     char* output=NULL;
     int n, i, j, flag;
-    s.type = S;
     symbol1.type = P;   //<
     endToken.type = END;
     endToken.value = (char*)malloc(2*sizeof(char));
@@ -187,8 +186,6 @@ char* parse(Token* tokens) {
         if (stackTop.type == S && stack->value.type == END && tokens->type == END){
             break;
         }
-        //printf("%d - ", tokens->type);
-        //printf("%c", precedenceTable[stackTop.type][tokens->type]);
         if ((stackTop.type == A || stackTop.type == B || stackTop.type == S) && tokens->type != END){
             if ((stackTop.type == A || stackTop.type == B) && (tokens->type == RPAREN || tokens->type == COMMA)){
                 action = '>';
@@ -259,7 +256,7 @@ char* parse(Token* tokens) {
 }
 
 int main() {
-    /*
+    
     Token tokens[] = {
         {ADD, NULL},
         {LPAREN, NULL}, 
@@ -283,7 +280,8 @@ int main() {
         {RPAREN, NULL},
         {RPAREN, NULL},
         {END, NULL}
-    };*/
+    };
+    /*
     Token tokens[] = {
         {ADD, NULL},
         {LPAREN, NULL},
@@ -298,6 +296,7 @@ int main() {
         {RPAREN, NULL},
         {END, NULL}
     };
+    */
     int i=0;
     while(tokens[i].type != END){
         printf("%d ", tokens[i].type);
