@@ -209,6 +209,84 @@ void printTree(TreeNodePtr tree){
     printTree(tree->right);
 }
 
+int getPrecedence(const char* op) {
+    if (op == NULL) return 0;
+    
+    // Ternary operator has lowest precedence
+    if (op[0] == ':') return 1;
+    
+    // Addition and subtraction
+    if (op[0] == '+' || op[0] == '-') return 2;
+    
+    // Multiplication, division, modulo
+    if (op[0] == '*' || op[0] == '/' || op[0] == '%') return 3;
+    
+    // Exponentiation has highest precedence
+    if (op[0] == '^') return 4;
+    
+    // Return 0 for non-operators (numbers)
+    return 0;
+}
+
+
+char* finalOutput(TreeNodePtr tree, char* output) {
+    if (tree == NULL) return output;
+
+    // Allocate memory for the output if not already done
+    if (output == NULL) {
+        output = (char*)malloc(256 * sizeof(char)); // Adjust size as needed
+        output[0] = '\0'; // Initialize as an empty string
+    }
+
+    // Determine if parentheses are needed based on operator precedence
+    int needParens = 0;
+    if (tree->left && getPrecedence(tree->data) && getPrecedence(tree->left->data)) {
+        // Check if the current node's operator has lower precedence than its children
+        if (getPrecedence(tree->data) > getPrecedence(tree->left->data)) {
+            needParens = 1;
+        }
+        else if (getPrecedence(tree->data) == 4 && getPrecedence(tree->left->data) == 4){
+            needParens = 1;
+        }
+    }
+
+    if (needParens) strcat(output, "( ");
+
+    // Traverse left subtree
+    output = finalOutput(tree->left, output);
+
+    if (needParens){
+        strcat(output, ") ");
+        needParens = 0;
+    }
+
+    // Append current node's data
+    strcat(output, tree->data);
+    strcat(output, " "); // Add space for separation
+
+    if (tree->right && getPrecedence(tree->data) && getPrecedence(tree->right->data)) {
+        // Check if the current node's operator has lower precedence than its children
+        if (getPrecedence(tree->data) > getPrecedence(tree->right->data)) {
+            needParens = 1;
+        }
+        else if (getPrecedence(tree->data) == 4 && getPrecedence(tree->right->data) == 4){
+            needParens = 1;
+        }
+    }
+
+    if (needParens) strcat(output, "( ");
+
+    // Traverse right subtree
+    output = finalOutput(tree->right, output);
+
+    if (needParens){
+        strcat(output, ") ");
+        needParens = 0;
+    }
+
+
+    return output;
+}
 
 char* parse(Token* tokens) {
     StackPtr stack = NULL;
@@ -302,8 +380,10 @@ char* parse(Token* tokens) {
         printf("\n");
     }
     if (stack->value.type == END){
-        output = (char*)malloc(14*sizeof(char));
-        strcpy(output, "true!");
+        //printTree(stackTree->value);
+        output = finalOutput(stackTree->value, output);
+        //output+=2;
+        //output[strlen(output)-1] = '\0';
         printTree(stackTree->value);
         return output;
     }
@@ -315,33 +395,106 @@ char* parse(Token* tokens) {
 }
 
 int main() {
-    /*
+    
     Token tokens[] = {
-        {ADD, NULL},
-        {LPAREN, NULL}, 
+        {ADD, "+"},
+        {LPAREN, "("}, 
         {NUMBER, "5"},
-        {COMMA, NULL},
-        {MUL, NULL},
-        {LPAREN, NULL},
+        {COMMA, ","},
+        {MUL, "*"},
+        {LPAREN, "("},
         {NUMBER, "3"},
-        {COMMA, NULL},
-        {SUB, NULL},
-        {LPAREN, NULL},
+        {COMMA, ","},
+        {SUB, "-"},
+        {LPAREN, "("},
         {NUMBER, "10"},
-        {COMMA, NULL},
-        {POW, NULL},
-        {LPAREN, NULL},
+        {COMMA, ","},
+        {POW, "^"},
+        {LPAREN, "("},
         {NUMBER, "6"},
-        {COMMA, NULL},
+        {COMMA, ","},
         {NUMBER, "4"},
-        {RPAREN, NULL},
-        {RPAREN, NULL},
-        {RPAREN, NULL},
-        {RPAREN, NULL},
+        {RPAREN, ")"},
+        {RPAREN, ")"},
+        {RPAREN, ")"},
+        {RPAREN, ")"},
         {END, NULL}
     };
-    */
+
+    Token tokens2[] = {
+        {TERN, "?"},
+        {LPAREN, "("},
+        {NUMBER, "1"},
+        {COMMA, ","},
+        {NUMBER, "2"},
+        {COMMA, ","},
+        {NUMBER, "4"},
+        {RPAREN, ")"},
+        {END, NULL}
+    };
+
+    Token tokens3[] = {
+        {POW, "^"},
+        {LPAREN, "("},
+        {POW, "^"},
+        {LPAREN, "("},
+        {NUMBER, "2"},
+        {COMMA, ","},
+        {NUMBER, "3"},
+        {RPAREN, ")"},
+        {COMMA, ","},
+        {NUMBER, "1"},
+        {RPAREN, ")"},
+        {END, NULL}
+    };
+
+    Token tokens4[] = {
+        {TERN, "?"},
+        {LPAREN, "("},
+        {NUMBER, "5e2"},
+        {COMMA, ","},
+        {NUMBER, "2.7"},
+        {COMMA, ","},
+        {NUMBER, "1"},
+        {RPAREN, ")"},
+        {END, NULL}
+    };
+
+    Token tokens5[] = {
+        {ADD, "+"},
+        {LPAREN, "("},
+        {NUMBER, "1"},
+        {COMMA, ","},
+        {ADD, "+"},
+        {LPAREN, "("},
+        {NUMBER, "2"},
+        {COMMA, ","},
+        {NUMBER, "3"},
+        {RPAREN, ")"},
+        {RPAREN, ")"},
+        {END, NULL}
+    };
+
+    Token tokens6[] = {
+        {TERN, "?"},
+        {LPAREN, "("},
+        {NUMBER, "1"},
+        {COMMA, ","},
+        {TERN, "?"},
+        {LPAREN, "("},
+        {NUMBER, "2"},
+        {COMMA, ","},
+        {NUMBER, "3"},
+        {COMMA, ","},
+        {NUMBER, "4"},
+        {RPAREN, ")"},
+        {COMMA, ","},
+        {NUMBER, "5"},
+        {RPAREN, ")"},
+        {END, NULL}
+    };
     
+    /*
     Token tokens[] = {
         {ADD, "+"},
         {LPAREN, "("},
@@ -356,15 +509,9 @@ int main() {
         {RPAREN, ")"},
         {END, NULL}
     };
+    */
     
-    int i=0;
-    while(tokens[i].type != END){
-        printf("%d ", tokens[i].type);
-        i++;
-    }
-    printf("\n");
-    
-    char* result = parse(tokens);
+    char* result = parse(tokens6);
     printf("Parse result: %s\n", result);
     free(result);
     
