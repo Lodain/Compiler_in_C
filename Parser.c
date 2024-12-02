@@ -266,7 +266,7 @@ char* finalOutput(TreeNodePtr tree, char* output) {
     // same as before but for the right subtree
     if (tree->right && getPrecedence(tree->data) && getPrecedence(tree->right->data)) {
         if (getPrecedence(tree->data) >= getPrecedence(tree->right->data)) {
-            if (getPrecedence(tree->data) == 2 && getPrecedence(tree->left->data) == 2){
+            if (getPrecedence(tree->data) == 2 && getPrecedence(tree->right->data) == 2){
                 needParens = 0;
             }
             else needParens = 1;

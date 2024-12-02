@@ -24,12 +24,12 @@ void runExample(const char* input) {
 
 int main(int argc, char *argv[]) {
     if (argc >1){
-        for (int i = 0; i < argc; i++){
+        for (int i = 1; i < argc; i++){
             runExample(argv[i]);
         }
     }
     else{
-        FILE *file = fopen("test.txt", "r");
+        FILE *file = fopen("test2.txt", "r");
         if (file == NULL) {
             fprintf(stderr, "Could not open test.txt\n");
             return 1;
