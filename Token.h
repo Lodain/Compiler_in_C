@@ -1,5 +1,7 @@
+#ifndef TOKEN_H
+#define TOKEN_H
 
-// TokenType 
+// TokenType enum declaration
 typedef enum {
     ADD=0,  //0
     SUB,    //1
@@ -25,3 +27,5 @@ typedef struct {
     TokenType type;
     char *value;
 } Token;
+
+#endif // TOKEN_H
