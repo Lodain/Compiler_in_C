@@ -1,5 +1,3 @@
-//input: Source code
-//output: String of Tokens
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,8 +26,30 @@ typedef struct {
     char *value;
 } Token;
 
-//function to remove whitespace and comments from the source code
-char* removeWhitespaceAndComments(char* source);
+//this function is used to remove the whitespace and comments from the source code
+char* removeWhitespaceAndComments(char* source) {
+    int inComment = 0;
+    int index = 0;
+    int length = strlen(source);
+    char* result = (char*)malloc(length + 1); 
+
+    for (int i = 0; i < length; i++) {
+        if (!inComment && i + 1 < length && source[i] == '/' && source[i + 1] == '*') {
+            inComment = 1; 
+            i++; 
+        } 
+        else if (inComment && i + 1 < length && source[i] == '*' && source[i + 1] == '/') {
+            inComment = 0; 
+            i++; 
+        } 
+        else if (!inComment && !isspace((unsigned char)source[i])) {
+            result[index++] = source[i];
+        }
+    }
+
+    result[index] = '\0'; 
+    return result;
+}
 
 //to create this function I used some FA
 //I created a total of 7 FA's, (10 if we count the parentheses and comma)
@@ -535,30 +555,6 @@ Token* scan(char* code){
         tokens[0].value=(char*)malloc(50*sizeof(char));
         sprintf(tokens[0].value, "Lexical error! Position %d", (sourceCode-first)+1);
     }
+    free(first);
     return tokens;
-}
-
-//this function is used to remove the whitespace and comments from the source code
-char* removeWhitespaceAndComments(char* source) {
-    int inComment = 0;
-    int index = 0;
-    int length = strlen(source);
-    char* result = (char*)malloc(length + 1); 
-
-    for (int i = 0; i < length; i++) {
-        if (!inComment && i + 1 < length && source[i] == '/' && source[i + 1] == '*') {
-            inComment = 1; 
-            i++; 
-        } 
-        else if (inComment && i + 1 < length && source[i] == '*' && source[i + 1] == '/') {
-            inComment = 0; 
-            i++; 
-        } 
-        else if (!inComment && !isspace((unsigned char)source[i])) {
-            result[index++] = source[i];
-        }
-    }
-
-    result[index] = '\0'; 
-    return result;
 }

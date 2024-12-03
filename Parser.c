@@ -144,7 +144,6 @@ void printStack(StackPtr stack) {
         printf("Stack is empty\n");
         return;
     }
-    
     StackPtr current = stack;
     printf("Stack (top to bottom): ");
     while (current != NULL) {
@@ -246,6 +245,12 @@ char* finalOutput(TreeNodePtr tree, char* output) {
                 needParens = 0;
             }
             else needParens = 1;
+        }
+        else if (getPrecedence(tree->data) == getPrecedence(tree->left->data)){
+            if (getPrecedence(tree->data) == 4 && getPrecedence(tree->left->data) == 4){
+                needParens = 1;
+            }
+            else needParens = 0;
         }
     }
 
@@ -376,7 +381,11 @@ char* parse(Token* tokens) {
                     return output;
                 }
                 break;
-            }
+            default:
+                output = (char*)malloc(14*sizeof(char));
+                strcpy(output, "Syntax Error!");
+                return output;
+        }
         // I used this two function to check the stack
         //printStack(stack);
         //printf("\n");

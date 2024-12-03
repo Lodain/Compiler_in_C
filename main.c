@@ -14,7 +14,6 @@ void runExample(const char* input) {
     char* result = parse(tokens);
     printf("Output: %s\n\n", result);
 
-    // Free allocated memory
     free(result);
     for (int i = 0; tokens[i].type != END; i++) {
         free(tokens[i].value);
@@ -29,7 +28,7 @@ int main(int argc, char *argv[]) {
         }
     }
     else{
-        FILE *file = fopen("test2.txt", "r");
+        FILE *file = fopen("test.txt", "r");
         if (file == NULL) {
             fprintf(stderr, "Could not open test.txt\n");
             return 1;
