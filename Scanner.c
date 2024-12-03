@@ -553,7 +553,7 @@ Token* scan(char* code){
         tokens=(Token*)malloc(sizeof(Token));
         tokens[0].type=ERROR;
         tokens[0].value=(char*)malloc(50*sizeof(char));
-        sprintf(tokens[0].value, "Lexical error! Position %d", (sourceCode-first)+1);
+        sprintf(tokens[0].value, "Lexical error! Position %ld", (sourceCode-first)+1);
     }
     free(first);
     return tokens;
